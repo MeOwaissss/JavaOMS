@@ -1,0 +1,95 @@
+<nav *ngIf="authService.isLoggedIn()" class="navbar navbar-expand-lg sticky-top border-bottom border-secondary px-4 py-3" style="background-color: var(--dark-bg);">
+  <div class="container-fluid align-items-center">
+    
+    <!-- Left Section: Logo & Catalog Button -->
+    <div class="d-flex align-items-center me-4">
+      <a class="navbar-brand text-light fw-bold fs-4 me-4 font-tech" routerLink="/" style="letter-spacing: 1px;">
+        OMS<span style="color: var(--primary-color);">.</span>
+      </a>
+      
+      <!-- Hamburger Catalog Button -->
+      <button *ngIf="authService.getRole() === 'ROLE_CUSTOMER'" class="catalog-btn" routerLink="/catalog">
+        Catalog
+      </button>
+    </div>
+
+    <!-- Toggle button for mobile -->
+    <button class="navbar-toggler text-light border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Center Section: Navigation Links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
+        <!-- Admin Links -->
+        <ng-container *ngIf="authService.getRole() === 'ROLE_ADMIN'">
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/products" routerLinkActive="active">Products</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/customers" routerLinkActive="active">Customers</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/stock" routerLinkActive="active">Inventory</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/orders" routerLinkActive="active">Orders</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/reports" routerLinkActive="active">Reports</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/admin/tickets" routerLinkActive="active">Tickets</a></li>
+        </ng-container>
+
+        <!-- Customer Links (Modeled after image: Bestsellers, Sale, New Arrivals etc) -->
+        <ng-container *ngIf="authService.getRole() === 'ROLE_CUSTOMER'">
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/catalog" routerLinkActive="active">Bestsellers</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/orders" routerLinkActive="active">My Orders</a></li>
+          <li class="nav-item"><a class="nav-link text-light nav-underline-active" routerLink="/tickets" routerLinkActive="active">Support</a></li>
+        </ng-container>
+      </ul>
+
+      <!-- Right Section: Icons -->
+      <div class="d-flex align-items-center gap-4">
+        <!-- Cart Icon (For Customers) -->
+        <div *ngIf="authService.getRole() === 'ROLE_CUSTOMER'">
+          <a class="text-light text-decoration-none cursor-pointer d-flex align-items-center" style="gap: 8px;" routerLink="/catalog">
+            <i class="bi bi-cart3 fs-5"></i>
+            <span class="d-none d-md-inline" style="font-size: 0.9rem;">Cart</span>
+          </a>
+        </div>
+
+        <!-- Notifications -->
+        <div class="dropdown">
+          <a class="text-light text-decoration-none cursor-pointer position-relative" data-bs-toggle="dropdown" (click)="loadNotifications()">
+            <i class="bi bi-bell fs-5"></i>
+            <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: var(--primary-color); color: #111;">
+              {{ unreadCount }}
+            </span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 320px; max-height: 400px; overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+              <h6 class="mb-0 text-light">Notifications</h6>
+              <button *ngIf="unreadCount > 0" class="btn btn-link p-0 text-decoration-none fw-bold" style="color: var(--primary-color);" (click)="markAllRead()">Clear All</button>
+            </div>
+            <li *ngIf="notifications.length === 0" class="text-center py-3 text-light opacity-50">No notifications</li>
+            <li *ngFor="let n of notifications" class="p-2 mb-2 rounded border border-secondary" [ngClass]="{'bg-transparent': n.isRead, 'bg-dark': !n.isRead}" style="cursor: pointer;" (click)="markRead(n)">
+              <div class="d-flex justify-content-between">
+                <span class="small text-light">{{ n.message }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- User Profile / Log in -->
+        <div class="dropdown">
+          <a class="text-light text-decoration-none cursor-pointer d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" style="gap: 8px;">
+            <i class="bi bi-person fs-5"></i>
+            <span class="d-none d-md-inline" style="font-size: 0.9rem;">{{ authService.getUsername() }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
+            <li><hr class="dropdown-divider border-secondary"></li>
+            <li><a class="dropdown-item text-danger" (click)="logout()">Sign Out</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 80px);">
+  <router-outlet></router-outlet>
+</div>

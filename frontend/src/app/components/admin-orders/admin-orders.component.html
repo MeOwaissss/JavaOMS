@@ -1,0 +1,185 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">Orders & Delivery Center</h2>
+      <p class="text-light opacity-50">Manage customer bookings, dispatch parcels, and update logistics tracking details.</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card glass-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="text-gradient mb-0">Customer Orders</h5>
+          <button class="btn neon-btn" (click)="toggleCreateOrder()">{{ showCreateOrder ? 'Cancel Create' : 'Create New Order' }}</button>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders" style="cursor: pointer;" (click)="onSelectOrder(order)">
+                <td class="fw-bold">{{ order.orderNumber }}</td>
+                <td>{{ order.createdAt | date:'shortDate' }}</td>
+                <td>{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
+                <td>{{ order.orderItems.length }} items</td>
+                <td class="fw-bold">₹{{ order.totalAmount }}</td>
+                <td>
+                  <span class="badge py-1 px-3 rounded-pill" [ngClass]="{
+                    'badge-pending': order.status === 'PENDING',
+                    'badge-confirmed': order.status === 'CONFIRMED',
+                    'badge-packed': order.status === 'PACKED',
+                    'badge-out-for-delivery': order.status === 'OUT_FOR_DELIVERY',
+                    'badge-delivered': order.status === 'DELIVERED',
+                    'badge-cancelled': order.status === 'CANCELLED'
+                  }">{{ order.status }}</span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-link text-gradient p-0 fw-bold text-decoration-none" (click)="onSelectOrder(order); $event.stopPropagation()">Manage</button>
+                </td>
+              </tr>
+              <tr *ngIf="orders.length === 0">
+                <td colspan="7" class="text-center text-light opacity-50 py-4">No customer orders booked.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card glass-card p-4">
+        <div *ngIf="showCreateOrder">
+          <h5 class="text-gradient mb-4">Create New Order</h5>
+          <form [formGroup]="newOrderForm" (ngSubmit)="submitNewOrder()">
+            <div class="mb-3">
+              <label class="form-label text-light opacity-75">Select Customer</label>
+              <select formControlName="customerId" class="form-select">
+                <option value="" disabled selected>Select a customer...</option>
+                <option *ngFor="let cust of customers" [value]="cust.id">{{ cust.firstName }} {{ cust.lastName }} ({{ cust.phone }})</option>
+              </select>
+            </div>
+            
+            <h6 class="text-gradient mb-2 mt-4">Add Products</h6>
+            <div class="d-flex gap-2 mb-3">
+              <select class="form-select flex-grow-1" [(ngModel)]="selectedProductId" [ngModelOptions]="{standalone: true}">
+                <option value="" disabled selected>Select a product...</option>
+                <option *ngFor="let prod of products" [value]="prod.id">{{ prod.name }} - ₹{{ prod.price }}</option>
+              </select>
+              <input type="number" class="form-control" style="width: 80px;" [(ngModel)]="selectedQuantity" [ngModelOptions]="{standalone: true}" min="1">
+              <button type="button" class="btn btn-secondary" (click)="addToCart()">Add</button>
+            </div>
+
+            <div class="table-responsive mb-4 bg-dark bg-opacity-25 rounded p-2" *ngIf="cartItems.length > 0">
+              <table class="table table-glass table-sm table-borderless align-middle mb-0">
+                <thead>
+                  <tr class="border-bottom border-secondary">
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of cartItems; let i = index">
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-link text-danger p-0" (click)="removeFromCart(i)"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-grid mt-4">
+              <button type="submit" [disabled]="newOrderForm.invalid || cartItems.length === 0" class="btn neon-btn">Place Order</button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="!showCreateOrder">
+          <h5 class="text-gradient mb-4">Order Operations Panel</h5>
+          
+          <div *ngIf="!selectedOrder" class="text-center text-light opacity-50 py-5">
+            <i class="bi bi-card-list fs-3 mb-3 d-block"></i>
+            Select an order to dispatch or update tracking.
+          </div>
+
+        <div *ngIf="selectedOrder">
+          <div class="mb-4 pb-3 border-bottom border-secondary">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="fw-bold text-light">Order: {{ selectedOrder.orderNumber }}</span>
+              <span class="text-light opacity-50">{{ selectedOrder.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="small text-light opacity-75">Customer: {{ selectedOrder.customer.firstName }} {{ selectedOrder.customer.lastName }} ({{ selectedOrder.customer.phone }})</div>
+            <div class="small text-light opacity-75">Address: {{ selectedOrder.customer.address }}, {{ selectedOrder.customer.city }}, {{ selectedOrder.customer.state }} - {{ selectedOrder.customer.zipCode }}</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-light opacity-75">Modify Status</label>
+            <div class="d-flex gap-2">
+              <select class="form-select" #statusSelect [value]="selectedOrder.status">
+                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+              </select>
+              <button class="btn neon-btn" (click)="onUpdateStatus(selectedOrder.id!, statusSelect.value)">Update</button>
+            </div>
+          </div>
+
+          <h6 class="text-gradient mb-3">Line Items</h6>
+          <div class="table-responsive mb-4 bg-dark bg-opacity-25 rounded p-2">
+            <table class="table table-glass table-sm table-borderless align-middle mb-0">
+              <thead>
+                <tr class="border-bottom border-secondary">
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th class="text-end">GST</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of selectedOrder.orderItems">
+                  <td>{{ item.product.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>₹{{ item.price }}</td>
+                  <td class="text-end">₹{{ item.gstAmount }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-end fw-bold text-light mt-2 pe-2">Total: ₹{{ selectedOrder.totalAmount }}</div>
+          </div>
+
+          <h6 class="text-gradient mb-3">Logistics & Tracking</h6>
+          <form [formGroup]="deliveryForm" (ngSubmit)="onSubmitDelivery()">
+            <div class="mb-3">
+              <label for="deliveryPartner" class="form-label text-light opacity-75">Courier Partner</label>
+              <input type="text" id="deliveryPartner" formControlName="deliveryPartner" class="form-control" placeholder="e.g. FedEx, DHL">
+            </div>
+
+            <div class="mb-3">
+              <label for="trackingNumber" class="form-label text-light opacity-75">Tracking ID</label>
+              <input type="text" id="trackingNumber" formControlName="trackingNumber" class="form-control" placeholder="e.g. TRK123456789">
+            </div>
+
+            <div class="mb-4">
+              <label for="estimatedDelivery" class="form-label text-light opacity-75">Estimated Delivery Date</label>
+              <input type="date" id="estimatedDelivery" formControlName="estimatedDelivery" class="form-control">
+            </div>
+
+            <button type="submit" [disabled]="deliveryForm.invalid" class="btn neon-btn w-100">Save Delivery Information</button>
+          </form>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

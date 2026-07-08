@@ -1,0 +1,40 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">WhatsApp Notification Center</h2>
+      <p class="text-light opacity-50">Audit log records of notifications dispatched to administrative staff upon new booking placements.</p>
+    </div>
+  </div>
+
+  <div class="card glass-card p-4">
+    <h5 class="text-gradient mb-4">WhatsApp Alert Logs</h5>
+    
+    <div class="table-responsive">
+      <table class="table table-glass table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Recipient Contact</th>
+            <th>Alert Message Body</th>
+            <th>Sent Timestamp</th>
+            <th>Log Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of logs">
+            <td>{{ log.id }}</td>
+            <td class="fw-bold">{{ log.recipientNumber }}</td>
+            <td class="text-light opacity-75">{{ log.messageBody }}</td>
+            <td>{{ log.sentAt | date:'medium' }}</td>
+            <td>
+              <span class="badge bg-success bg-opacity-15 text-success border border-success rounded-pill py-1 px-3">{{ log.status }}</span>
+            </td>
+          </tr>
+          <tr *ngIf="logs.length === 0">
+            <td colspan="5" class="text-center text-light opacity-50 py-4">No alert logs recorded yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

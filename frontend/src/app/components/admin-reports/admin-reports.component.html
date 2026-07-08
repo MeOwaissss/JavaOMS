@@ -1,0 +1,95 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">Business Intelligence & Reports</h2>
+      <p class="text-light opacity-50">Filter business transactions, evaluate categories, and export audit trails to Excel spreadsheets.</p>
+    </div>
+  </div>
+
+  <div class="card glass-card p-4 mb-5">
+    <form [formGroup]="filterForm" (ngSubmit)="onGenerateReport()" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label for="startDate" class="form-label text-light opacity-75">Start Date</label>
+        <input type="date" id="startDate" formControlName="startDate" class="form-control">
+      </div>
+
+      <div class="col-md-3">
+        <label for="endDate" class="form-label text-light opacity-75">End Date</label>
+        <input type="date" id="endDate" formControlName="endDate" class="form-control">
+      </div>
+
+      <div class="col-md-3">
+        <label for="cat" class="form-label text-light opacity-75">Category Filter</label>
+        <select id="cat" formControlName="categoryId" class="form-select">
+          <option value="">All Categories</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn neon-btn flex-grow-1"><i class="bi bi-search me-2"></i>Filter</button>
+        <button type="button" class="btn neon-btn-secondary" (click)="onExportExcel()"><i class="bi bi-file-earmark-excel-fill me-2"></i>Export</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card glass-card p-4 text-center">
+        <h6 class="text-light opacity-75 mb-2">Total Filtered Bookings</h6>
+        <h3 class="fw-bold mb-0 text-gradient">{{ reportOrders.length }} orders</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card glass-card p-4 text-center">
+        <h6 class="text-light opacity-75 mb-2">Net Filtered Revenue</h6>
+        <h3 class="fw-bold mb-0 text-gradient">₹{{ totalRevenue | number:'1.2-2' }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="card glass-card p-4">
+    <h5 class="text-gradient mb-4">Generated Transactions Ledger</h5>
+    
+    <div class="table-responsive">
+      <table class="table table-glass table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Items Detail</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of reportOrders">
+            <td class="fw-bold">{{ o.orderNumber }}</td>
+            <td>{{ o.createdAt | date:'mediumDate' }}</td>
+            <td>{{ o.customer.firstName }} {{ o.customer.lastName }}</td>
+            <td>
+              <span *ngFor="let i of o.orderItems; let last = last">
+                {{ i.product.name }} (x{{ i.quantity }}){{ !last ? ', ' : '' }}
+              </span>
+            </td>
+            <td class="fw-bold">₹{{ o.totalAmount }}</td>
+            <td>
+              <span class="badge py-1 px-3 rounded-pill" [ngClass]="{
+                'badge-pending': o.status === 'PENDING',
+                'badge-confirmed': o.status === 'CONFIRMED',
+                'badge-packed': o.status === 'PACKED',
+                'badge-out-for-delivery': o.status === 'OUT_FOR_DELIVERY',
+                'badge-delivered': o.status === 'DELIVERED',
+                'badge-cancelled': o.status === 'CANCELLED'
+              }">{{ o.status }}</span>
+            </td>
+          </tr>
+          <tr *ngIf="reportOrders.length === 0">
+            <td colspan="6" class="text-center text-light opacity-50 py-4">No report records matches filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

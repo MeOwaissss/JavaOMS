@@ -1,0 +1,174 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">Catalog Management</h2>
+      <p class="text-light opacity-50">Manage items, barcodes, taxes, categories, and catalogs.</p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <ul class="nav nav-pills gap-2 bg-transparent p-0">
+        <li class="nav-item">
+          <button class="nav-link px-4 text-light" [ngClass]="{'active neon-btn': activeTab === 'products'}" (click)="setTab('products')">Products</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link px-4 text-light" [ngClass]="{'active neon-btn': activeTab === 'categories'}" (click)="setTab('categories')">Categories</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row g-4" *ngIf="activeTab === 'products'">
+    <div class="col-lg-4">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">{{ editingProduct ? 'Edit Product' : 'Add New Product' }}</h5>
+        
+        <form [formGroup]="productForm" (ngSubmit)="onSaveProduct()">
+          <div class="mb-3">
+            <label for="sku" class="form-label text-light opacity-75">SKU / Barcode</label>
+            <input type="text" id="sku" formControlName="sku" class="form-control" placeholder="e.g. PROD1001">
+          </div>
+
+          <div class="mb-3">
+            <label for="name" class="form-label text-light opacity-75">Product Name</label>
+            <input type="text" id="name" formControlName="name" class="form-control" placeholder="Product name">
+          </div>
+
+          <div class="mb-3">
+            <label for="categoryId" class="form-label text-light opacity-75">Category</label>
+            <select id="categoryId" formControlName="categoryId" class="form-select">
+              <option value="" disabled selected>Select category</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="price" class="form-label text-light opacity-75">Base Price (₹)</label>
+            <input type="number" id="price" formControlName="price" class="form-control" placeholder="0.00">
+          </div>
+
+          <div class="mb-3">
+            <label for="gstPercent" class="form-label text-light opacity-75">GST (%)</label>
+            <input type="number" id="gstPercent" formControlName="gstPercent" class="form-control" placeholder="18">
+          </div>
+
+          <div class="mb-3">
+            <label for="imageUrl" class="form-label text-light opacity-75">Image URL</label>
+            <input type="text" id="imageUrl" formControlName="imageUrl" class="form-control" placeholder="Image url or path">
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="form-label text-light opacity-75">Description</label>
+            <textarea id="description" formControlName="description" rows="3" class="form-control" placeholder="Brief description"></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" [disabled]="productForm.invalid" class="btn neon-btn flex-grow-1">Save Product</button>
+            <button type="button" class="btn neon-btn-secondary" (click)="resetProductForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Products Catalog</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>GST</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of products">
+                <td class="fw-bold">{{ p.sku }}</td>
+                <td>
+                  <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&h=80&fit=crop'" 
+                       alt="product img" class="rounded border border-secondary" style="width: 40px; height: 40px; object-fit: cover;">
+                </td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.category.name }}</td>
+                <td>₹{{ p.price }}</td>
+                <td>{{ p.gstPercent }}%</td>
+                <td class="text-end">
+                  <button class="btn btn-link text-gradient p-1 me-2" (click)="onEditProduct(p)"><i class="bi bi-pencil-square fs-5"></i></button>
+                  <button class="btn btn-link text-danger p-1" (click)="onDeleteProduct(p.id!)"><i class="bi bi-trash fs-5"></i></button>
+                </td>
+              </tr>
+              <tr *ngIf="products.length === 0">
+                <td colspan="7" class="text-center text-light opacity-50 py-4">No products found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4" *ngIf="activeTab === 'categories'">
+    <div class="col-lg-4">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">{{ editingCategory ? 'Edit Category' : 'Add New Category' }}</h5>
+        
+        <form [formGroup]="categoryForm" (ngSubmit)="onSaveCategory()">
+          <div class="mb-3">
+            <label for="catName" class="form-label text-light opacity-75">Category Name</label>
+            <input type="text" id="catName" formControlName="name" class="form-control" placeholder="Category name">
+          </div>
+
+          <div class="mb-4">
+            <label for="catDesc" class="form-label text-light opacity-75">Description</label>
+            <textarea id="catDesc" formControlName="description" rows="3" class="form-control" placeholder="Brief description"></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" [disabled]="categoryForm.invalid" class="btn neon-btn flex-grow-1">Save Category</button>
+            <button type="button" class="btn neon-btn-secondary" (click)="resetCategoryForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Categories List</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categories">
+                <td>{{ cat.id }}</td>
+                <td class="fw-bold">{{ cat.name }}</td>
+                <td>{{ cat.description }}</td>
+                <td class="text-end">
+                  <button class="btn btn-link text-gradient p-1 me-2" (click)="onEditCategory(cat)"><i class="bi bi-pencil-square fs-5"></i></button>
+                  <button class="btn btn-link text-danger p-1" (click)="onDeleteCategory(cat.id!)"><i class="bi bi-trash fs-5"></i></button>
+                </td>
+              </tr>
+              <tr *ngIf="categories.length === 0">
+                <td colspan="4" class="text-center text-light opacity-50 py-4">No categories found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

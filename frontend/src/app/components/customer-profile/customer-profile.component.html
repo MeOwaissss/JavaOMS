@@ -1,0 +1,62 @@
+<div class="container-fluid fade-in-up">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card glass-card p-4">
+        <h4 class="text-gradient mb-4">My Profile Settings</h4>
+        
+        <div class="alert alert-success" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+        <div class="alert alert-danger" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-light opacity-75">First Name</label>
+              <input type="text" formControlName="firstName" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-light opacity-75">Last Name</label>
+              <input type="text" formControlName="lastName" class="form-control" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light opacity-75">Phone Number</label>
+            <input type="text" formControlName="phone" class="form-control" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light opacity-75">Shipping Address</label>
+            <textarea formControlName="address" rows="2" class="form-control"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label text-light opacity-75">City</label>
+              <input type="text" formControlName="city" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label text-light opacity-75">State</label>
+              <input type="text" formControlName="state" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label text-light opacity-75">Zip Code</label>
+              <input type="text" formControlName="zipCode" class="form-control" />
+            </div>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" [disabled]="profileForm.invalid" class="btn neon-btn">
+              Update Profile
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

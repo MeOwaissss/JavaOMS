@@ -1,0 +1,10 @@
+# Root gitignore
+.idea/
+.vscode/
+node_modules/
+dist/
+target/
+*.class
+*.log
+*.jar
+*.war

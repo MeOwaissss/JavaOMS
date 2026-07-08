@@ -1,0 +1,117 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">My Order History</h2>
+      <p class="text-light opacity-50">Track delivery logistics, review past invoices, and print bills.</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Past Bookings</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Booking Date</th>
+                <th>Total Bill</th>
+                <th>Status</th>
+                <th class="text-end">Invoice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders" style="cursor: pointer;" (click)="onSelectOrder(order)">
+                <td class="fw-bold">{{ order.orderNumber }}</td>
+                <td>{{ order.createdAt | date:'mediumDate' }}</td>
+                <td class="fw-bold">₹{{ order.totalAmount }}</td>
+                <td>
+                  <span class="badge py-1 px-3 rounded-pill" [ngClass]="{
+                    'badge-pending': order.status === 'PENDING',
+                    'badge-confirmed': order.status === 'CONFIRMED',
+                    'badge-packed': order.status === 'PACKED',
+                    'badge-out-for-delivery': order.status === 'OUT_FOR_DELIVERY',
+                    'badge-delivered': order.status === 'DELIVERED',
+                    'badge-cancelled': order.status === 'CANCELLED'
+                  }">{{ order.status }}</span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-link text-gradient p-0 fw-bold text-decoration-none" (click)="onDownloadInvoice(order.id!); $event.stopPropagation()"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</button>
+                </td>
+              </tr>
+              <tr *ngIf="orders.length === 0">
+                <td colspan="5" class="text-center text-light opacity-50 py-4">No order bookings placed yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Booking Receipt Details</h5>
+        
+        <div *ngIf="!selectedOrder" class="text-center text-light opacity-50 py-5">
+          <i class="bi bi-receipt-cutoff fs-3 mb-3 d-block"></i>
+          Select a booking to preview invoice details and tracking logs.
+        </div>
+
+        <div *ngIf="selectedOrder">
+          <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+            <div>
+              <h6 class="fw-bold text-light mb-1">Receipt ID: {{ selectedOrder.orderNumber }}</h6>
+              <span class="small text-light opacity-50">Booked: {{ selectedOrder.createdAt | date:'medium' }}</span>
+            </div>
+            <button class="btn neon-btn btn-sm" (click)="onDownloadInvoice(selectedOrder.id!)"><i class="bi bi-printer me-1"></i>Download PDF</button>
+          </div>
+
+          <h6 class="text-gradient mb-3">Itemized Bill</h6>
+          <div class="table-responsive bg-dark bg-opacity-25 rounded p-2 mb-4">
+            <table class="table table-glass table-sm table-borderless mb-0">
+              <thead>
+                <tr class="border-bottom border-secondary">
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th class="text-end">Tax GST</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of selectedOrder.orderItems">
+                  <td>{{ item.product.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>₹{{ item.price }}</td>
+                  <td class="text-end">₹{{ item.gstAmount }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-end fw-bold text-light fs-6 mt-2 pe-2">Grand Total: ₹{{ selectedOrder.totalAmount }}</div>
+          </div>
+
+          <h6 class="text-gradient mb-3">Delivery Information</h6>
+          <div class="p-3 rounded bg-dark border border-secondary" *ngIf="deliveryDetails">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="small text-light opacity-75">Tracking Status:</span>
+              <span class="badge py-1 px-3 rounded-pill bg-light text-dark fw-bold">{{ deliveryDetails.status }}</span>
+            </div>
+            <div class="mb-2">
+              <span class="small text-light opacity-75 d-block">Courier Partner:</span>
+              <strong class="text-light">{{ deliveryDetails.deliveryPartner || 'Awaiting Dispatch' }}</strong>
+            </div>
+            <div class="mb-2">
+              <span class="small text-light opacity-75 d-block">Tracking ID:</span>
+              <strong class="text-light">{{ deliveryDetails.trackingNumber || 'Not Available' }}</strong>
+            </div>
+            <div>
+              <span class="small text-light opacity-75 d-block">Estimated Arrival:</span>
+              <strong class="text-light">{{ deliveryDetails.estimatedDelivery ? (deliveryDetails.estimatedDelivery | date:'longDate') : 'Pending Confirmation' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

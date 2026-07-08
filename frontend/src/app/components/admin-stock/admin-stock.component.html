@@ -1,0 +1,136 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-gradient">Stock & Inventory Management</h2>
+      <p class="text-light opacity-50">Track stock levels, minimum thresholds, and adjust inventory balances.</p>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-lg-8">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Current Stock Balances</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Threshold</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of stocks">
+                <td class="fw-bold">{{ s.product.sku }}</td>
+                <td>{{ s.product.name }}</td>
+                <td class="fw-bold">{{ s.quantity }}</td>
+                <td>{{ s.minimumRequired }}</td>
+                <td>
+                  <span *ngIf="s.quantity <= s.minimumRequired" class="badge bg-danger bg-opacity-15 text-danger border border-danger rounded-pill py-1 px-3">Low Stock</span>
+                  <span *ngIf="s.quantity > s.minimumRequired" class="badge bg-success bg-opacity-15 text-success border border-success rounded-pill py-1 px-3">In Stock</span>
+                </td>
+                <td class="text-end">
+                  <button class="btn neon-btn py-1 px-3 btn-sm" (click)="onSelectStock(s)">Adjust</button>
+                </td>
+              </tr>
+              <tr *ngIf="stocks.length === 0">
+                <td colspan="6" class="text-center text-light opacity-50 py-4">No stock inventory found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card glass-card p-4 h-100">
+        <h5 class="text-gradient mb-4">Inventory Adjustment</h5>
+        
+        <div *ngIf="!selectedStock" class="text-center text-light opacity-50 py-5">
+          <i class="bi bi-info-circle fs-3 mb-3 d-block"></i>
+          Select a product from the list to adjust stock levels.
+        </div>
+
+        <form *ngIf="selectedStock" [formGroup]="adjustmentForm" (ngSubmit)="onSubmitAdjustment()">
+          <div class="p-3 mb-4 rounded bg-dark border border-secondary">
+            <div class="small text-light opacity-50">Selected Product:</div>
+            <div class="fw-bold text-light">{{ selectedStock.product.name }}</div>
+            <div class="small text-light opacity-75 mt-1">Current Stock: <span class="fw-bold text-gradient">{{ selectedStock.quantity }} units</span></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="type" class="form-label text-light opacity-75">Adjustment Type</label>
+            <select id="type" formControlName="type" class="form-select">
+              <option value="ADD">Add Stock (+)</option>
+              <option value="REMOVE">Remove Stock (-)</option>
+              <option value="ADJUST">Force Override (=)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="changeQuantity" class="form-label text-light opacity-75">Quantity / Value</label>
+            <input type="number" id="changeQuantity" formControlName="changeQuantity" class="form-control" placeholder="1">
+          </div>
+
+          <div class="mb-4">
+            <label for="reason" class="form-label text-light opacity-75">Reason / Notes</label>
+            <textarea id="reason" formControlName="reason" rows="3" class="form-control" placeholder="e.g. Regular replenishment"></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" [disabled]="adjustmentForm.invalid" class="btn neon-btn flex-grow-1">Apply Adjustment</button>
+            <button type="button" class="btn neon-btn-secondary" (click)="selectedStock = null">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">Stock Ledger / History Logs</h5>
+        
+        <div class="table-responsive">
+          <table class="table table-glass table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>SKU</th>
+                <th>Product</th>
+                <th>Change</th>
+                <th>Type</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of histories">
+                <td>{{ h.createdAt | date:'medium' }}</td>
+                <td class="fw-bold">{{ h.stock.product.sku }}</td>
+                <td>{{ h.stock.product.name }}</td>
+                <td class="fw-bold" [ngClass]="{'text-success': h.type === 'ADD', 'text-danger': h.type === 'REMOVE', 'text-warning': h.type === 'ADJUST'}">
+                  {{ h.type === 'ADD' ? '+' : '' }}{{ h.changeQuantity }}
+                </td>
+                <td>
+                  <span class="badge py-1 px-3 rounded-pill" [ngClass]="{
+                    'bg-success bg-opacity-15 text-success border border-success': h.type === 'ADD',
+                    'bg-danger bg-opacity-15 text-danger border border-danger': h.type === 'REMOVE',
+                    'bg-warning bg-opacity-15 text-warning border border-warning': h.type === 'ADJUST'
+                  }">{{ h.type }}</span>
+                </td>
+                <td class="text-light opacity-75">{{ h.reason }}</td>
+              </tr>
+              <tr *ngIf="histories.length === 0">
+                <td colspan="6" class="text-center text-light opacity-50 py-4">No ledger logs recorded.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

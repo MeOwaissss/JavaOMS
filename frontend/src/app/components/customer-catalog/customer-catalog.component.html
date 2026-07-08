@@ -1,0 +1,168 @@
+<div class="container-fluid fade-in-up mt-3">
+  
+  <div class="row g-4">
+    
+    <!-- LEFT SIDEBAR: FILTERS -->
+    <div class="col-lg-2">
+      <!-- Huge Heading -->
+      <h2 class="font-tech text-white mb-2" style="font-size: 2rem; letter-spacing: 1px;">Bestsellers</h2>
+      <div class="small text-light opacity-50 mb-4">
+        Home <span class="mx-1">•</span> Bestsellers
+      </div>
+
+      <!-- Selected Filters Chips -->
+      <div class="d-flex flex-wrap mb-4">
+        <div class="chip cursor-pointer" (click)="selectedCategoryId = ''; onSearch()">
+          <i class="bi bi-x-circle me-1"></i> Reset filters
+        </div>
+        <div class="chip" *ngIf="selectedCategoryId">
+           {{ getSelectedCategoryName() }} <i class="bi bi-x close-icon" (click)="selectedCategoryId = ''; onSearch()"></i>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="mb-4">
+        <h6 class="text-white d-flex justify-content-between align-items-center mb-3 cursor-pointer">
+          Price <i class="bi bi-chevron-down text-light opacity-50"></i>
+        </h6>
+        
+        <h6 class="text-white d-flex justify-content-between align-items-center mb-3 mt-4 cursor-pointer">
+          Brand <i class="bi bi-chevron-up text-light opacity-50"></i>
+        </h6>
+        
+        <!-- Removed search brands input here -->
+
+        <!-- Brands Checkboxes (Categories) -->
+        <div class="d-flex flex-column gap-2 mt-3">
+          <label class="d-flex align-items-center cursor-pointer text-light opacity-75 small" *ngFor="let cat of categories">
+            <input type="radio" name="categoryFilter" class="custom-checkbox me-2" 
+                   [value]="cat.id" [(ngModel)]="selectedCategoryId" (change)="onSearch()" style="width: 16px; height: 16px;">
+            {{ cat.name }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER SECTION: PRODUCT GRID -->
+    <div class="col-lg-7">
+
+      <!-- Main Product Search -->
+      <div class="position-relative mb-4">
+        <i class="bi bi-search position-absolute text-light opacity-50" style="left: 16px; top: 12px; font-size: 1rem;"></i>
+        <input type="text" id="catalogSearchInput" class="form-control rounded-pill ps-5 py-2 bg-dark text-white" placeholder="Search products by name, description..." style="border: 1px solid #333;" [(ngModel)]="searchQuery" (input)="onSearch()">
+      </div>
+      
+      <!-- Top Filters & Sort -->
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-2 overflow-x-auto" style="white-space: nowrap;">
+        <div class="d-flex gap-4 pe-3">
+          <a class="nav-link text-light cursor-pointer" [ngClass]="{'nav-underline-active active': !selectedCategoryId}" (click)="selectedCategoryId=''; onSearch()">All items</a>
+          <a class="nav-link text-light cursor-pointer" *ngFor="let cat of categories | slice:0:3" 
+             [ngClass]="{'nav-underline-active active': selectedCategoryId == cat.id?.toString()}" 
+             (click)="selectedCategoryId = cat.id?.toString() || ''; onSearch()">{{ cat.name }}</a>
+        </div>
+        <div>
+          <button class="catalog-btn" (click)="toggleSort()">
+            <i class="bi" [ngClass]="isAscending ? 'bi-sort-up' : 'bi-sort-down'"></i> Price
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="row g-4">
+        <div *ngFor="let p of products" class="col-md-6 col-xl-4">
+          <div class="glass-card h-100 p-3 position-relative d-flex flex-column">
+            
+            <!-- Badges & Actions -->
+            <div class="d-flex justify-content-between position-absolute w-100 px-3" style="top: 16px; left: 0; z-index: 5;">
+              <span class="sale-badge">Sale {{ p.gstPercent + 5 }}%</span>
+              <button class="btn-icon" (click)="addToCart(p)">
+                <i class="bi bi-suit-heart"></i>
+              </button>
+            </div>
+
+            <!-- Product Image -->
+            <div class="text-center mb-3 rounded flex-grow-1" style="background-color: #222224; padding: 1.5rem; height: 160px; display: flex; align-items: center; justify-content: center; margin-top: 10px;">
+              <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=200&fit=crop'" 
+                   alt="product" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+            </div>
+            
+            <!-- Details -->
+            <div class="d-flex justify-content-between align-items-center mb-1 mt-auto">
+              <span class="text-light opacity-50 small text-uppercase fw-bold">{{ p.category.name }}</span>
+              <span class="small" style="color: var(--primary-color); font-weight: 600;"><i class="bi bi-star-fill me-1"></i>4.{{ (p.id! % 10) || 8 }}</span>
+            </div>
+            
+            <div class="d-flex align-items-center mb-1">
+              <span class="fs-4 fw-bold text-white me-2 font-tech">₹{{ p.price }}</span>
+              <span class="text-light opacity-50 text-decoration-line-through small">₹{{ p.price * 1.15 | number:'1.2-2' }}</span>
+            </div>
+            
+            <div class="text-light opacity-75 small mb-3">{{ p.name }}</div>
+
+            <button class="btn neon-btn-secondary w-100 mt-auto py-2 text-uppercase fw-bold" style="font-size: 0.85rem;" (click)="addToCart(p)">
+              <i class="bi bi-cart-plus me-2"></i>Add to Cart
+            </button>
+          </div>
+        </div>
+
+        <!-- No Products -->
+        <div *ngIf="products.length === 0" class="col-12 text-center py-5 text-light opacity-50">
+          No products match your criteria.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR: CART TRAY -->
+    <div class="col-lg-3">
+      <div class="card glass-card p-4 sticky-top" style="top: 90px; z-index: 10;">
+        <h5 class="text-white mb-4 d-flex align-items-center">
+          <i class="bi bi-cart-fill me-2" style="color: var(--primary-color);"></i> Cart 
+          <span class="badge ms-2" style="background-color: var(--primary-color); color: #111;">{{ cart.length }}</span>
+        </h5>
+        
+        <div *ngIf="cart.length === 0" class="text-center text-light opacity-50 py-4 small">
+          Your cart is empty.<br>Add items from the catalog.
+        </div>
+
+        <div *ngIf="cart.length > 0">
+          <div class="d-flex flex-column gap-3 mb-4 max-vh-50 overflow-y-auto pe-2" style="max-height: 350px;">
+            <div *ngFor="let item of cart" class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary">
+              <div class="flex-grow-1 me-2">
+                <div class="small fw-bold text-light">{{ item.product.name }}</div>
+                <div class="small text-light opacity-50" style="font-size: 0.75rem;">₹{{ item.product.price }} each</div>
+              </div>
+              
+              <div class="d-flex align-items-center gap-2">
+                <input type="number" [ngModel]="item.quantity" (ngModelChange)="updateQuantity(item.product.id!, $event)" 
+                       class="form-control form-control-sm text-center p-1 bg-dark border-secondary text-white" style="width: 45px; height: 30px;">
+                <button class="btn btn-link text-danger p-0 ms-1" (click)="removeFromCart(item.product.id!)"><i class="bi bi-x fs-5"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 mb-4 rounded bg-dark border border-secondary">
+            <div class="d-flex justify-content-between mb-2 small text-light opacity-75">
+              <span>Items Total:</span>
+              <span>₹{{ getCartTotal() | number:'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold text-white fs-5 mt-2 pt-2 border-top border-secondary">
+              <span>Total:</span>
+              <span class="font-tech" style="color: var(--primary-color);">₹{{ getCartTotal() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <button class="btn neon-btn w-100 btn-lg font-tech fs-6" (click)="onBookProducts()">Confirm Order</button>
+        </div>
+
+        <div *ngIf="bookingSuccess" class="alert alert-success border-success bg-transparent text-success mt-4 p-2 small">
+          <i class="bi bi-check-circle-fill me-1"></i>{{ bookingMessage }}
+        </div>
+        <div *ngIf="bookingError" class="alert alert-danger border-danger bg-transparent text-danger mt-4 p-2 small">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ bookingError }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="container-fluid fade-in-up">
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="text-gradient">Support Center</h2>
+        <p class="text-light opacity-50">Log technical issues, verify resolutions, and communicate with administrative staff.</p>
+      </div>
+      <button class="btn neon-btn" (click)="creatingTicket = true; selectedIssue = null"><i class="bi bi-plus-circle me-2"></i>Log Ticket</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card glass-card p-4">
+        <h5 class="text-gradient mb-4">My Support Requests</h5>
+        
+        <div class="list-group list-group-flush bg-transparent">
+          <button *ngFor="let issue of issues" 
+                  (click)="onSelectIssue(issue)" 
+                  class="list-group-item list-group-item-action bg-transparent text-light border-secondary p-3"
+                  [class.active]="selectedIssue?.id === issue.id">
+            <div class="d-flex w-100 justify-content-between mb-2">
+              <h6 class="mb-0 fw-bold">{{ issue.subject }}</h6>
+              <span class="badge py-1 px-3 rounded-pill" [ngClass]="{
+                'bg-danger bg-opacity-15 text-danger border border-danger': issue.status === 'OPEN',
+                'bg-success bg-opacity-15 text-success border border-success': issue.status === 'RESOLVED',
+                'bg-info bg-opacity-15 text-info border border-info': issue.status === 'RESPONDED'
+              }">{{ issue.status }}</span>
+            </div>
+            <p class="mb-2 text-light opacity-75 small text-truncate">{{ issue.description }}</p>
+            <div class="d-flex justify-content-between small text-light opacity-50">
+              <span>Date: {{ issue.createdAt | date:'mediumDate' }}</span>
+            </div>
+          </button>
+
+          <div *ngIf="issues.length === 0" class="text-center text-light opacity-50 py-5">
+            You haven't submitted any support requests yet.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card glass-card p-4">
+        <div *ngIf="!selectedIssue && !creatingTicket" class="text-center text-light opacity-50 py-5">
+          <i class="bi bi-question-circle fs-3 mb-3 d-block"></i>
+          Select a support ticket from the list or log a new ticket.
+        </div>
+
+        <div *ngIf="creatingTicket">
+          <h5 class="text-gradient mb-4">Submit Support Ticket</h5>
+          <form [formGroup]="issueForm" (ngSubmit)="onSubmitTicket()">
+            <div class="mb-3">
+              <label for="subject" class="form-label text-light opacity-75">Subject / Topic</label>
+              <input type="text" id="subject" formControlName="subject" class="form-control" placeholder="e.g. Delayed dispatch, Item replacement">
+            </div>
+
+            <div class="mb-4">
+              <label for="desc" class="form-label text-light opacity-75">Problem Description</label>
+              <textarea id="desc" formControlName="description" rows="5" class="form-control" placeholder="Detail your issue here..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" [disabled]="issueForm.invalid" class="btn neon-btn flex-grow-1">Submit Ticket</button>
+              <button type="button" class="btn neon-btn-secondary" (click)="creatingTicket = false">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="selectedIssue">
+          <div class="p-3 mb-4 rounded bg-dark border border-secondary">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="fw-bold text-light">Issue Topic: {{ selectedIssue.subject }}</span>
+              <span class="small text-light opacity-50">{{ selectedIssue.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="text-light opacity-75 small">Description: {{ selectedIssue.description }}</div>
+          </div>
+
+          <h6 class="text-gradient mb-3">Conversation Logs</h6>
+          <div class="d-flex flex-column gap-3 mb-4 p-2 bg-dark bg-opacity-25 rounded" style="max-height: 250px; overflow-y: auto;">
+            <div *ngFor="let r of replies" class="p-3 rounded border border-secondary"
+                 [ngClass]="{'align-self-start bg-transparent w-75': r.user.role.name === 'ROLE_CUSTOMER', 'align-self-end bg-dark w-75': r.user.role.name === 'ROLE_ADMIN'}">
+              <div class="d-flex justify-content-between small text-light opacity-50 mb-1">
+                <span class="fw-bold">{{ r.user.username }} ({{ r.user.role.name === 'ROLE_ADMIN' ? 'Support' : 'Client' }})</span>
+                <span>{{ r.createdAt | date:'short' }}</span>
+              </div>
+              <div class="text-light text-break small">{{ r.message }}</div>
+            </div>
+            <div *ngIf="replies.length === 0" class="text-center text-light opacity-50 py-3 small">
+              Wait for support replies. No logs yet.
+            </div>
+          </div>
+
+          <form [formGroup]="replyForm" (ngSubmit)="onSubmitReply()">
+            <div class="mb-3">
+              <label for="replyMsg" class="form-label text-light opacity-75">Send Message</label>
+              <textarea id="replyMsg" formControlName="message" rows="3" class="form-control" placeholder="Write message to staff..."></textarea>
+            </div>
+            <button type="submit" [disabled]="replyForm.invalid" class="btn neon-btn w-100">Send Response</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
