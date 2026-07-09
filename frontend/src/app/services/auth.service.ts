@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   checkHealth(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/health?t=${new Date().getTime()}`);
+    return this.http.get(`${this.apiUrl}/db-ping?t=${new Date().getTime()}`);
   }
 
   register(userData: any): Observable<any> {

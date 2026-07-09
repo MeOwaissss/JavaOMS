@@ -28,7 +28,7 @@ public class AuthController {
     @Autowired
     private javax.sql.DataSource dataSource;
 
-    @GetMapping("/health")
+    @GetMapping("/db-ping")
     public ResponseEntity<java.util.Map<String, String>> healthCheck() {
         java.util.Map<String, String> response = new java.util.HashMap<>();
         try (java.sql.Connection connection = dataSource.getConnection();
