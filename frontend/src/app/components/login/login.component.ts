@@ -33,8 +33,9 @@ export class LoginComponent implements OnInit {
           this.dbStatus = 'DISCONNECTED';
         }
       },
-      error: () => {
+      error: (err) => {
         this.dbStatus = 'DISCONNECTED';
+        this.errorMessage = 'Health check failed: ' + (err.message || err.statusText);
       }
     });
   }
