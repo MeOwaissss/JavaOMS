@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styles: []
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -22,6 +22,22 @@ export class LoginComponent {
   });
 
   errorMessage: string = '';
+  dbStatus: 'CHECKING' | 'CONNECTED' | 'DISCONNECTED' = 'CHECKING';
+
+  ngOnInit() {
+    this.authService.checkHealth().subscribe({
+      next: (res) => {
+        if (res.database === 'CONNECTED') {
+          this.dbStatus = 'CONNECTED';
+        } else {
+          this.dbStatus = 'DISCONNECTED';
+        }
+      },
+      error: () => {
+        this.dbStatus = 'DISCONNECTED';
+      }
+    });
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) return;

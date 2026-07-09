@@ -32,6 +32,10 @@ export class AuthService {
     );
   }
 
+  checkHealth(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/health`);
+  }
+
   register(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, userData);
   }
