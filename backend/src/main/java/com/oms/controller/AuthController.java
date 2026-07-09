@@ -31,14 +31,16 @@ public class AuthController {
     @GetMapping("/health")
     public ResponseEntity<java.util.Map<String, String>> healthCheck() {
         java.util.Map<String, String> response = new java.util.HashMap<>();
-        try (java.sql.Connection connection = dataSource.getConnection()) {
-            if (connection.isValid(2)) {
+        try (java.sql.Connection connection = dataSource.getConnection();
+             java.sql.Statement statement = connection.createStatement();
+             java.sql.ResultSet rs = statement.executeQuery("SELECT 1")) {
+            if (rs.next()) {
                 response.put("status", "UP");
                 response.put("database", "CONNECTED");
                 return ResponseEntity.ok(response);
             }
         } catch (Exception e) {
-            // connection failed
+            response.put("error", e.getMessage());
         }
         response.put("status", "DOWN");
         response.put("database", "DISCONNECTED");
